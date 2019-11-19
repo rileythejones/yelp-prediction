@@ -16,17 +16,21 @@ column1 = dbc.Col(
         dcc.Markdown(
             """
         
-            ## Your Value Proposition
+            ## Predict reviewer characteristics 
 
-            Emphasize how the app will benefit users. Don't emphasize the underlying technology.
+           We browse yelp because we want to see what customers have to say about restaurants and other businesses.
+           But what do we have to say about customers? Is a reviewer really a customer? 
+           
+           See that one-star review? Don't take it personally. The average rating for that reviewer is 
+           is 1.2. 
 
-            ✅ RUN is a running app that adapts to your fitness levels and designs personalized workouts to help you improve your running.
+           This user left a really long review, I wonder if they normally do that? 
 
-            ❌ RUN is the only intelligent running app that uses sophisticated deep neural net machine learning to make your run smarter because we believe in ML driven workouts.
+           How do ratings differ when we look at different Zip Codes?
 
             """
         ),
-        dcc.Link(dbc.Button('Your Call To Action', color='primary'), href='/predictions')
+        dcc.Link(dbc.Button("Predict", color='primary'), href='/predictions')
     ],
     md=4,
 )
