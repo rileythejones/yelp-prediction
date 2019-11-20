@@ -35,13 +35,17 @@ column1 = dbc.Col(
     md=4,
 )
 
-gapminder = px.data.gapminder()
-fig = px.scatter(gapminder.query("year==2007"), x="gdpPercap", y="lifeExp", size="pop", color="continent",
-           hover_name="country", log_x=True, size_max=60)
+
+import pandas as pd 
+
+dataset = pd.read_csv('assets/yelp_sample_dataset.csv')
+fig2 = px.scatter(dataset, x='review_count', y='text_length', color='average_stars')
+
+
 
 column2 = dbc.Col(
     [
-        dcc.Graph(figure=fig),
+        dcc.Graph(figure=fig2)
     ]
 )
 
