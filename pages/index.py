@@ -12,7 +12,7 @@ from app import app
 # 2 column layout. 1st column width = 4/12
 # https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
 column1 = dbc.Col(
-    [
+    dbc.Row([
         dcc.Markdown(
             """
         
@@ -31,17 +31,20 @@ column1 = dbc.Col(
             """
         ),
         dcc.Link(dbc.Button("Predict", color='primary'), href='/predictions')
-    ],
-    md=4,
+    ,
+    ])
 )
-
 
 import pandas as pd 
 
+
 dataset = pd.read_csv('assets/yelp_sample_dataset.csv')
-fig2 = px.scatter(dataset, x='review_count', y='text_length', color='average_stars')
+fig2 = px.scatter_3d(dataset, x='year_joined', y='text_length', z='stars_business', color='average_stars')
 
-
+fig2.update_layout(
+     width=1200,
+    height=1200
+)
 
 column2 = dbc.Col(
     [

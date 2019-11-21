@@ -1,117 +1,109 @@
-# Imports from 3rd party libraries
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
-# Imports from this application
 from app import app
 
-# 2 column layout. 1st column width = 4/12
-# https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
-
-
 import pandas as pd
-
-dataset = pd.read_csv('assets/yelp_sample_dataset.csv')
-
-from sklearn.model_selection import train_test_split
-train, test = train_test_split(dataset, test_size =0.1, shuffle=True, random_state=42)
-
-# train.shape, test.shape
-
-# target = "average_stars_class"
-# X_train = train.drop(columns=[target, 'average_stars'])
-# y_train = train[target]
-# X_test = test.drop(columns=[target, 'average_stars'])
-# y_test = test[target]
-
-# from sklearn.pipeline import make_pipeline
-# import category_encoders as ce
-# from sklearn.impute import SimpleImputer
-# transformers = make_pipeline(
-#     ce.OrdinalEncoder(),
-#     SimpleImputer(strategy='median')
-# )
-# X_train_T = transformers.fit_transform(X_train)
-# X_test_T = transformers.transform(X_test)
-
-# from sklearn.linear_model import LinearRegression
-# model = LinearRegression()
-# model.fit(X_train_T, y_train) 
-# print("Model Score: ", model.score(X_test_T, y_test))
+from joblib import load
+pipeline = load('assets/pipeline.joblib')
 
 
-from sklearn.externals import joblib
-import plotly.graph_objs as go
+column1 = dbc.Col([html.H1('Prediction:', className='mb-5')])
+
+column2 = dbc.Col([
+     html.Div(id='output-state')
+    ])
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
-
-    app.layout = html.Div(children=[
-    html.H1(children='Simple Linear Regression', style={'textAlign': 'center'}),
-
-    html.Div(children=[
-        html.Label('Enter years of experience: '),
-    ], style={'textAlign': 'center'}),
-])
-
-
-dcc.Input(id='years-of-experience', placeholder='Years of experience', type='text')
-
-
-if __name__ == '__main__':
-    model = joblib.load("./linear_regression_model.pkl")
-    app.run_server(debug=True)
-
-
-@app.callback(
-    Output(component_id='result', component_property='children'),
-    [Input(component_id='years-of-experience', component_property='value')])
-def update_years_of_experience_input(years_of_experience):
-    pass
-
-
-@app.callback(
-    Output(component_id='result', component_property='children'),
-    [Input(component_id='years-of-experience', component_property='value')])
-def update_years_of_experience_input(years_of_experience):
-    if years_of_experience is not None and years_of_experience is not '':
-        try:
-            salary = model.predict(float(years_of_experience))[0]
-            return 'With {} years of experience you should earn a salary of ${:,.2f}'.                format(years_of_experience, salary, 2)
-        except ValueError:
-            return 'Unable to give years of experience'
+column3 = html.Div(className='row',
+children=[dbc.Col([
+    html.Div(dcc.Input(id='input-1-state', type='number', value='2018')),
+    html.Div(dcc.Input(id='input-2-state', type='number', value='3.0')),
+    html.Div(dcc.Input(id='input-3-state', type='number', value='5')), 
+    html.Div(html.Button(id='submit-button', n_clicks=0, children='Submit')),
+])])
 
 
 
-training_data = train
-training_labels = train.columns
 
 
 
-dcc.Graph(
-        id='scatter-plot',
-        figure={
-            'data': [
-                go.Scatter(
-                    x=training_data['YearsExperience'],
-                    y=training_labels,
-                    mode='markers',
-                    opacity=0.7,
-                    marker={
-                        'size': 15,
-                        'line': {'width': 0.5, 'color': 'white'}
-                    },
-                )
-            ],
-            'layout': go.Layout(
-                xaxis={'type': 'log', 'title': 'Years of Experience'},
-                yaxis={'title': 'Salary'},
-                margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
-                hovermode='closest'
-            )
-        }
+layout = dbc.Row([column1, column2, column3])
+
+# layout = html.Div([
+#     dcc.Input(id='input-1-state', type='text', value='2018'),
+#     dcc.Input(id='input-2-state', type='text', value='3.0'),
+#     dcc.Input(id='input-3-state', type='text', value='5'),
+#     html.Button(id='submit-button', n_clicks=0, children='Submit'),
+#     html.Div(id='output-state')
+# ])
+
+
+@app.callback(Output('output-state', 'children'),
+              [Input('submit-button', 'n_clicks')],
+              [State('input-1-state', 'value'),
+               State('input-2-state', 'value'),
+               State('input-3-state', 'value')])
+def update_output(n_clicks, input1, input2, input3):
+    df = pd.DataFrame(
+    columns=['input1', 'input2', 'input3'], 
+    data=[[input1, input2, input3]]
     )
+    y_pred = pipeline.predict(df)[0]
+    f'{y_pred:.0f} text_length'
+    return u'''
+        For a user that joined in {},
+        where the average number of stars they give is {},
+        and the number of reviews they have is {}, 
+        then we predict their review is approximately {:.0f} characters long.
+        
+    '''.format(input1, input2, input3, y_pred)
+
+
+# column1 = dbc.Col([
+#     dcc.Input(id='year_joined-state', value='2018', type='text'),
+#     # html.Div(id='my-div'),
+#     dcc.Input(id='average_stars-state', value='3.0', type='text'),
+#     dcc.Input(id='user_review_count-state', value='7', type='text'),
+#     html.Button(id='submit-button', n_clicks=0, children='Submit'),
+#     html.Div(id='output-state')
+# ])
+
+
+
+# column2 = dbc.Col([
+#         html.H2('Expected Length', className='mb-5'), 
+#         html.Div(id='predict-state', className='lead')
+#     ])
+
+
+# @app.callback(Output('predict-state', 'children'),
+#     [Input('submit-button', 'n_clicks')], 
+#     [State('year_joined', 'value'),
+#     State('average_stars', 'value'),
+#     State('user_review_count', 'value')])
+
+# def update_predict(n_clicks, year_joined, average_stars, user_review_count):
+#     df = pd.DataFrame(
+#     columns=['year_joined', 'average_stars', 'user_review_count'], 
+#     data=[[year_joined, average_stars, user_review_count]]
+#     )
+
+#     y_pred = pipeline.predict(df)[0]
+#     return f'{y_pred:.0f} text_length'
+
+
+
+# layout = dbc.Row([column1, column2])
+
+# if __name__ == "__main__":
+#     app.run_server(debug=True)
+
+
+
+
+
+

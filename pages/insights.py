@@ -20,8 +20,16 @@ column1 = dbc.Col(
 
             """
         ),
+        dcc.Markdown(
+                    """
+                
+                    ##### https://www.hbs.edu/faculty/Publication%20Files/12-016_a7e4a5a2-03f9-490d-b093-8f951238dba2.pdf
 
+
+                    """
+        ),
     ],
 )
 
 layout = dbc.Row([column1])
+
